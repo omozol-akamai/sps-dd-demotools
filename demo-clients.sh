@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-red=$(tput setaf 5)
+red=$(tput setaf 1)
 green=$(tput setaf 2)
 normal=$(tput sgr0)
 SC_SUB="demo.sub"
@@ -8,8 +8,7 @@ SB_SUB="demo.shop"
 
 
 function start_setup {
-printf "\n\n\n=================================================================\n\n\n"
-printf "${green}Start${normal}\n\n"
+printf "\n${green}Start${normal}\n\n"
 
 CS_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' compose_cacheserve_1)
 PX_IP=$(docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' compose_proxy_1)
@@ -222,7 +221,6 @@ DC_WIFI_DEVICES="
 "
 
 echo -n "${DC_WIFI_DEVICES}" >/tmp/dc-demo-svc.yaml
-
 egrep 'WIFI DEV START' /usr/local/nom/share/nom-demo/docker/compose/docker-compose.yml >/dev/null
 RC=$?
 if [[ $RC == 1 ]]
@@ -348,6 +346,7 @@ curl -H 'Content-type: application/json' -u admin:${SSM_PWD} --request POST --da
 curl -H 'Content-type: application/json' -u admin:${SSM_PWD} --request POST --data "{\"add\":[{\"name\":\"Mobile\",\"profile\":\"adults\",\"identifiers\":[\"3955555555\"]}]}" http://localhost:9090/account/${SC_SUB}/logical-device
 }
 
+
 function configure_subscriber_sb {
 SSM_PWD=$(docker exec -i compose_sportal_1 sh -c 'cat /usr/local/nom/etc/sportal/sportal_test_users.properties | head -1 | cut -d" " -f 4')
 WIFI_DEV_A_MAC=$(docker inspect compose_wifi-dev-a_1 | jq -r '.[] | .NetworkSettings.Networks["compose_cpe-1"]["MacAddress"]')
@@ -430,6 +429,7 @@ curl -H 'Content-type: application/json' -u admin:${SSM_PWD} --request POST --da
 curl -H 'Content-type: application/json' -u admin:${SSM_PWD} --request POST --data "{\"add\":[{\"name\":\"Guest-Tablet\",\"profile\":\"Guests\",\"identifiers\":[\"${WIFI_DEV_B_MAC}\"]}]}" http://localhost:9090/account/${SB_SUB}/logical-device
 }
 
+
 function finish_setup_sc {
 EXT_IP=$(curl --silent --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
 printf "\n\n\n=================================================================\n\n\n"
@@ -439,19 +439,22 @@ echo "Home wi-fi device web-browser available at http://${EXT_IP}:8083"
 echo "Subscriber account management via portal is available at http://${EXT_IP}:8444, login: ${SC_SUB}, pwd: demo"
 }
 
+
 function finish_setup_sb {
 EXT_IP=$(curl --silent --header 'Metadata-Flavor: Google' http://metadata.google.internal/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip)
-printf "\n\n\n=================================================================\n\n\n"
-printf "${green}Setup completed${normal}\n\n"
+printf "\n${green}Setup completed${normal}\n\n"
 echo "Wi-fi device A web-browser available at http://${EXT_IP}:8085"
 echo "Wi-fi device B web-browser available at http://${EXT_IP}:8083"
 echo "Subscriber account management via portal is available at http://${EXT_IP}:8444/secure-business, login: ${SB_SUB}, pwd: demo"
 }
 
+
 function stop_services {
+printf "\n${red}Stopping services and removing subscriber${normal}\n\n"
 sed -i '/CPE START/,$d' /usr/local/nom/share/nom-demo/docker/compose/docker-compose.yml
 dc up -d --remove-orphans
 }
+
 
 function remove_subscriber {
 subscriber=$1
@@ -487,6 +490,7 @@ then
   configure_subscriber_sb
   finish_setup_sb
   exit 0
+fi
 
 if [[ $1 == stop_sc ]]
 then
