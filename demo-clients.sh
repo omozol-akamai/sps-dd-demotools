@@ -505,3 +505,11 @@ then
   remove_subscriber ${SB_SUB}
   exit 0
 fi
+
+cat <<EOF
+Usage: bash demo-clients.sh [ start_sc | start_sb | stop_sc | stop_sb ]
+  start_sc - Creates SC subscriber with 2 devices: 1 mobile and 1 residential "wi-fi" connected over CPE
+  stop_sc - Removes SC susbcriber along with reporting data and devices
+  start_sb - Creates SB subscriber with 2 "wi-fi" devices connected over CPE
+  stop_sb - Removes SB susbcriber along with reporting data and devices
+EOF
